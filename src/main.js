@@ -1,6 +1,6 @@
 import { MathUtils } from "./utils/math-utils.js";
 import { ViewportUtils } from "./utils/viewport-utils.js";
-
+import { Sphere } from "./scene-objects/sphere.js";
 
 // Create a canvas element and add it to the document
 const canvas = document.createElement('canvas');
@@ -34,13 +34,16 @@ const viewportSize = {
     width: 1,
     height: 1
 }; // Set viewport size
+
+
 // scene
-const Spheres = [
-    { center: [0, -1, 3], radius: 1, color: [255, 0, 0], specular: 500, reflective: 0.2 }, // Red sphere shiny
-    { center: [-2, 0, 4], radius: 1, color: [0, 0, 255], specular: 500, reflective: 0.3 }, // Green sphere shiny
-    { center: [2, 0, 4], radius: 1, color: [0, 255, 0], specular: 10, reflective: 0.4 }, // Blue sphere somewhat shiny
-    { center: [0, -5001, 0], radius: 5000, color: [255, 255, 0], specular: 1000, reflective: 0.5 }, // Yellow sphere very shiny
-]
+
+const sceneObjects = [
+    new Sphere([0, -1, 3], 1, [255, 0, 0], 500, 0.2), // Red sphere shiny
+    new Sphere([-2, 0, 4], 1, [0, 0, 255], 500, 0.3), // Green sphere shiny
+    new Sphere([2, 0, 4], 1, [0, 255, 0], 10, 0.4), // Blue sphere somewhat shiny
+    new Sphere([0, -5001, 0], 5000, [255, 255, 0], 1000, 0.5) // Yellow sphere very shiny
+];
 const lights = [
     {
         type: 'ambient',
@@ -122,27 +125,25 @@ function renderScene(R) {
 
 function TraceRay(O, D, t_min, t_max, recursion_depth) {
 
-    const [closest_sphere, closest_t] = ClosestIntersection(O, D, t_min, t_max);
+    const [closest_obj, closest_t] = ClosestIntersection(O, D, t_min, t_max);
 
-    if (closest_sphere === null) {
+    if (closest_obj === null) {
         // console.log("No sphere hit, returning background color");
         return [0, 0, 0]; // Background color
     }
 
     // console.log(`Hit sphere at ${closest_sphere.center} with color ${closest_sphere.color}`);
     const P = [O[0] + closest_t * D[0], O[1] + closest_t * D[1], O[2] + closest_t * D[2]]; // Intersection point
-    let N = [P[0] - closest_sphere.center[0], P[1] - closest_sphere.center[1], P[2] - closest_sphere.center[2]]; // Normal vector
-    const N_length = MathUtils.length(N);
-    N = [N[0] / N_length, N[1] / N_length, N[2] / N_length]; // Normalize the normal vector
-    const lighting = ComputeLighting(P, N, [D[0] * -1, D[1] * -1, D[2] * -1], closest_sphere.specular); // Compute lighting
+    const N = closest_obj.getNormal(P); // Normal at the intersection point
+    const lighting = ComputeLighting(P, N, [D[0] * -1, D[1] * -1, D[2] * -1], closest_obj.specular); // Compute lighting
     const local_color = [
-        closest_sphere.color[0] * lighting,
-        closest_sphere.color[1] * lighting,
-        closest_sphere.color[2] * lighting
+        closest_obj.color[0] * lighting,
+        closest_obj.color[1] * lighting,
+        closest_obj.color[2] * lighting
     ];
 
 
-    const r = closest_sphere.reflective;
+    const r = closest_obj.reflective;
     if (recursion_depth <= 0 || r <= 0) {
         // console.log(`Returning local color ${local_color}`);
         return local_color; // Return the local color if no reflection
@@ -160,40 +161,39 @@ function TraceRay(O, D, t_min, t_max, recursion_depth) {
 
 function ClosestIntersection(O, D, t_min, t_max) {
     let closest_t = Infinity;
-    let closest_sphere = null;
-    for (const sphere of Spheres) {
-        const [t1, t2] = IntersectRaySphere(O, D, sphere);
-        // console.log(`Testing sphere at ${sphere.center} with t1=${t1}, t2=${t2}`);
+    let closest_obj = null;
+    for (const obj of sceneObjects) {
+        const [t1, t2] = obj.intersect(O, D); // Get intersection point
         if (t1 > t_min && t1 < t_max && t1 < closest_t) {
             closest_t = t1;
-            closest_sphere = sphere;
+            closest_obj = obj;
         }
         if (t2 > t_min && t2 < t_max && t2 < closest_t) {
             closest_t = t2;
-            closest_sphere = sphere;
+            closest_obj = obj;
         }
     }
 
-    return [closest_sphere, closest_t]
+    return [closest_obj, closest_t]
 
 
 }
 
-function IntersectRaySphere(O, D, sphere) {
-    const r = sphere.radius
-    const CO = [O[0] - sphere.center[0], O[1] - sphere.center[1], O[2] - sphere.center[2]]
-    const a = MathUtils.dot(D, D)
-    const b = 2 * MathUtils.dot(CO, D)
-    const c = MathUtils.dot(CO, CO) - r * r
-    const discriminant = b * b - 4 * a * c
-    if (discriminant < 0) {
-        return [Infinity, Infinity] // No intersection
-    } else {
-        const t1 = (-b - Math.sqrt(discriminant)) / (2 * a)
-        const t2 = (-b + Math.sqrt(discriminant)) / (2 * a)
-        return [t1, t2]
-    }
-}
+// function IntersectRaySphere(O, D, sphere) {
+//     const r = sphere.radius
+//     const CO = [O[0] - sphere.center[0], O[1] - sphere.center[1], O[2] - sphere.center[2]]
+//     const a = MathUtils.dot(D, D)
+//     const b = 2 * MathUtils.dot(CO, D)
+//     const c = MathUtils.dot(CO, CO) - r * r
+//     const discriminant = b * b - 4 * a * c
+//     if (discriminant < 0) {
+//         return [Infinity, Infinity] // No intersection
+//     } else {
+//         const t1 = (-b - Math.sqrt(discriminant)) / (2 * a)
+//         const t2 = (-b + Math.sqrt(discriminant)) / (2 * a)
+//         return [t1, t2]
+//     }
+// }
 
 function ComputeLighting(P, N, V, s) {
     let i = 0.0
