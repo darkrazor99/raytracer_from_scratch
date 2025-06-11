@@ -1,6 +1,7 @@
 import { MathUtils } from "./utils/math-utils.js";
 import { ViewportUtils } from "./utils/viewport-utils.js";
 import { Sphere } from "./scene-objects/sphere.js";
+import { Plane } from "./scene-objects/plane.js";
 
 // Create a canvas element and add it to the document
 const canvas = document.createElement('canvas');
@@ -42,7 +43,11 @@ const sceneObjects = [
     new Sphere([0, -1, 3], 1, [255, 0, 0], 500, 0.2), // Red sphere shiny
     new Sphere([-2, 0, 4], 1, [0, 0, 255], 500, 0.3), // Green sphere shiny
     new Sphere([2, 0, 4], 1, [0, 255, 0], 10, 0.4), // Blue sphere somewhat shiny
-    new Sphere([0, -5001, 0], 5000, [255, 255, 0], 1000, 0.5) // Yellow sphere very shiny
+    // new Sphere([0, -5001, 0], 5000, [255, 255, 0], 1000, 0.5), // Yellow sphere very shiny
+
+    new Plane([0, -1, 0], [0, 1, 0], [255, 255, 0], 1000, 0.5), // acts as floor just to test will remove later
+    new Plane([0, 0, 10], [0, 0, -1], [200, 200, 225], 300, 0.1), // Blue plane faces camera
+
 ];
 const lights = [
     {
