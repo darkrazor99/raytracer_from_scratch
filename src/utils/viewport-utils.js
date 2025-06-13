@@ -1,7 +1,7 @@
 export class ViewportUtils {
 
-    static canvasToViewPort(x, y, canvas, viewportSize, d) {
-        return [x * viewportSize.width / canvas.width, y * viewportSize.height / canvas.height, d];
+    static canvasToViewPort(x, y, canvas, h, w, d) {
+        return [x * w / canvas.width, y * h / canvas.height, d];
     }
 
 }

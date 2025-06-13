@@ -2,8 +2,10 @@ import { MathUtils } from "./utils/math-utils.js";
 import { ViewportUtils } from "./utils/viewport-utils.js";
 import { Sphere } from "./scene-objects/sphere.js";
 import { Plane } from "./scene-objects/plane.js";
-
+import { Camera } from "./camera/camera.js";
+import { CameraController } from "./camera/camera-controller.js";
 // Create a canvas element and add it to the document
+
 const canvas = document.createElement('canvas');
 canvas.width = 1080; // Set canvas width
 canvas.height = 720; // Set canvas height
@@ -24,17 +26,17 @@ canvas.style.imageRendering = 'pixelated';
 
 
 
+document.addEventListener('pointerlockerror', () => {
+    console.error('❌ Pointer lock failed.');
+});
 
 
 
 let running = true; // Flag to control the rendering loop
 const recursion_depth = 3; // Set recursion depth for ray tracing
-const O = [0, 0, 0]; // Fixed syntax for defining 'o'
-const d = 1
-const viewportSize = {
-    width: 1,
-    height: 1
-}; // Set viewport size
+
+const camera = new Camera(); // Create a camera instance
+const cameraController = new CameraController(camera, canvas); // Create a camera controller instance
 
 
 // scene
@@ -67,56 +69,29 @@ const lights = [
 
 ]
 
-
-
-let yaw = 0; // Left/Right rotation angle
-let pitch = 0; // Up/Down rotation angle
-
-
-
-
-
-window.addEventListener('keydown', function handleKeyDown(event) {
-    switch (event.key) {
-        case 'ArrowLeft':
-            yaw -= 0.05; // Rotate left
-            break;
-        case 'ArrowRight':
-            yaw += 0.05; // Rotate right
-            break;
-        case 'ArrowDown':
-            pitch += 0.05; // Rotate down
-            break;
-        case 'ArrowUp':
-            pitch -= 0.05; // Rotate UP
-            break;
-        case 'Escape':
-            running = false;
-            window.removeEventListener('keydown', handleKeyDown);
-            console.log("not listening anymore yo phon linging") // Stop the rendering loop
-            return;
-    }
-});
-
 requestAnimationFrame(loop); // Start the rendering loop
 
 function loop() {
-    if (!running) {
-        return; // Exit the loop if not running
-    }
-    const R = MathUtils.multiply3x3Matrices(MathUtils.createPitchMatrix(pitch), MathUtils.createYawMatrix(yaw)); // Combine pitch and yaw rotations
+    if (!running) return;
+
+    //handle input
+    cameraController.update();
+
+    const R = camera.getRotationMatrix();
+    const position = camera.getPosition();
+
     lowResCtx.clearRect(0, 0, lowResCanvas.width, lowResCanvas.height);
-    renderScene(R); // Render the scene with the updated rotation
+    renderScene(R, position); // Render the scene with the updated rotation
     requestAnimationFrame(loop); // Request the next frame
 
 }
 
 
 
-function renderScene(R) {
+function renderScene(R, O) {
     for (let x = -(lowResCanvas.width / 2); x < (lowResCanvas.width / 2); x++) {
         for (let y = -(lowResCanvas.height / 2); y < (lowResCanvas.height / 2); y++) {
-            const D = ViewportUtils.canvasToViewPort(x, y, lowResCanvas, viewportSize, d); // Convert canvas coordinates to viewport coordinates
+            const D = ViewportUtils.canvasToViewPort(x, y, lowResCanvas, camera.getViewportHeight(), camera.getViewportWidth(), camera.getViewportDistance()); // Convert canvas coordinates to viewport coordinates
             const rotated_D = MathUtils.rotateVector(D, R); // Rotate the direction vector
             const color = TraceRay(O, rotated_D, 1, Infinity, recursion_depth);
             lowResCtx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
@@ -133,11 +108,9 @@ function TraceRay(O, D, t_min, t_max, recursion_depth) {
     const [closest_obj, closest_t] = ClosestIntersection(O, D, t_min, t_max);
 
     if (closest_obj === null) {
-        // console.log("No sphere hit, returning background color");
         return [0, 0, 0]; // Background color
     }
 
-    // console.log(`Hit sphere at ${closest_sphere.center} with color ${closest_sphere.color}`);
     const P = [O[0] + closest_t * D[0], O[1] + closest_t * D[1], O[2] + closest_t * D[2]]; // Intersection point
     const N = closest_obj.getNormal(P); // Normal at the intersection point
     const lighting = ComputeLighting(P, N, [D[0] * -1, D[1] * -1, D[2] * -1], closest_obj.specular); // Compute lighting
@@ -184,21 +157,6 @@ function ClosestIntersection(O, D, t_min, t_max) {
 
 }
 
-// function IntersectRaySphere(O, D, sphere) {
-//     const r = sphere.radius
-//     const CO = [O[0] - sphere.center[0], O[1] - sphere.center[1], O[2] - sphere.center[2]]
-//     const a = MathUtils.dot(D, D)
-//     const b = 2 * MathUtils.dot(CO, D)
-//     const c = MathUtils.dot(CO, CO) - r * r
-//     const discriminant = b * b - 4 * a * c
-//     if (discriminant < 0) {
-//         return [Infinity, Infinity] // No intersection
-//     } else {
-//         const t1 = (-b - Math.sqrt(discriminant)) / (2 * a)
-//         const t2 = (-b + Math.sqrt(discriminant)) / (2 * a)
-//         return [t1, t2]
-//     }
-// }
 
 function ComputeLighting(P, N, V, s) {
     let i = 0.0
