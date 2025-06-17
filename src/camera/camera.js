@@ -59,19 +59,20 @@ export class Camera {
 
     getRotationMatrix() {
         return MathUtils.multiply3x3Matrices(
-            MathUtils.createPitchMatrix(this.pitch),
-            MathUtils.createYawMatrix(this.yaw)
+        
+            MathUtils.createYawMatrix(this.yaw),
+            MathUtils.createPitchMatrix(this.pitch)
         );
     }
     
     getForwardVector() {
-        const rot = this.getRotationMatrix();
-        return [rot[2][0], rot[2][1], rot[2][2]]; 
+        const forward = [0, 0, 1];
+        return MathUtils.rotateVector(forward, this.getRotationMatrix()); 
     }
 
     getRightVector() {
-        const rot = this.getRotationMatrix();
-        return [rot[0][0], rot[0][1], rot[0][2]]; 
+        const right = [1, 0, 0];
+        return MathUtils.rotateVector(right, this.getRotationMatrix());
     }
 
 

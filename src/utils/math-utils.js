@@ -7,6 +7,12 @@ export class MathUtils {
         return Math.sqrt(this.dot(a, a));
     }
 
+    static normalize3(v){
+        const len = this.length(v);
+        if (len === 0) return [0, 0, 0]; // Avoid division by zero
+        return [v[0] / len, v[1] / len, v[2] / len];
+    }
+
     static reflectRay(R, N) {
         const dotProduct = this.dot(N, R);
         const reflectedRay = [

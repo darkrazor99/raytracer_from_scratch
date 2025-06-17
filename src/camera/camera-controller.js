@@ -1,3 +1,5 @@
+import { MathUtils } from "../utils/math-utils.js";
+
 export class CameraController { // first person
     constructor(camera, canvas) {
         this.camera = camera;
@@ -65,12 +67,13 @@ export class CameraController { // first person
 
         const { movementX, movementY } = e;
         const newYaw = this.camera.getYaw() + movementX * this.mouseSensitivity;;
-        const newPitch = this.camera.getPitch() - movementY * this.mouseSensitivity;
+        const newPitch = this.camera.getPitch() + movementY * this.mouseSensitivity;
 
         const maxPitch = Math.PI / 2 - 0.01; // Prevent flipping
         const newPitchClamped = Math.max(-maxPitch, Math.min(maxPitch, newPitch));
         this.camera.setYaw(newYaw);
         this.camera.setPitch(newPitchClamped);
+        // console.log(`Mouse moved: Yaw=${this.camera.getYaw().toFixed(2)}, Pitch=${this.camera.getPitch().toFixed(2)}`);
     }
 
     update() {
@@ -91,8 +94,13 @@ export class CameraController { // first person
         if (this.keysPressed.has('d')) {
             dx += right[0]; dy += right[1]; dz += right[2];
         }
-
-        this.camera.moveBy(dx * speed, dy * speed, dz * speed);
+        const movementVec = MathUtils.normalize3([dx, dy, dz]);
+        // console.log(`Movement vector: ${movementVec}`);
+        console.log("Yaw:", this.camera.getYaw().toFixed(2), 
+            "Pitch:", this.camera.getPitch().toFixed(2),
+            "Forward:", forward.map(n => n.toFixed(2)).join(', '));
+        // console.log('right vector:', right);
+        this.camera.moveBy(movementVec[0] * speed, movementVec[1] * speed, movementVec[2] * speed);
     }
 
 }
