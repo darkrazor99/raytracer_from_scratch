@@ -16,9 +16,6 @@ export class CameraController { // first person
         this._onPointerLockChange = this._onPointerLockChange.bind(this);
         this._requestPointerLock = this._requestPointerLock.bind(this);
 
-        this._addEventListeners();
-
-
     }
 
     _addEventListeners() {
@@ -27,7 +24,6 @@ export class CameraController { // first person
         document.addEventListener('keyup', this._onKeyUp);
         document.addEventListener('pointerlockchange', this._onPointerLockChange);
 
-        this.canvas.addEventListener('click', this._requestPointerLock);
     }
 
     _removeEventListeners() {
@@ -35,7 +31,6 @@ export class CameraController { // first person
         document.removeEventListener('keydown', this._onKeyDown);
         document.removeEventListener('keyup', this._onKeyUp);
         document.removeEventListener('pointerlockchange', this._onPointerLockChange);
-        this.canvas.removeEventListener('click', this._requestPointerLock);
     }
 
     _requestPointerLock() {
@@ -50,11 +45,10 @@ export class CameraController { // first person
     }
 
     _onKeyDown(e) {
-        if (e.key === 'Escape') {
-            this._removeEventListeners();
-            document.exitPointerLock();
-            return;
-        }
+        // if (e.key === 'Escape') {
+        //     this._removeEventListeners();
+        //     return;
+        // }
         this.keysPressed.add(e.key.toLowerCase());
     }
 
@@ -96,11 +90,22 @@ export class CameraController { // first person
         }
         const movementVec = MathUtils.normalize3([dx, dy, dz]);
         // console.log(`Movement vector: ${movementVec}`);
-        console.log("Yaw:", this.camera.getYaw().toFixed(2), 
+        console.log("Yaw:", this.camera.getYaw().toFixed(2),
             "Pitch:", this.camera.getPitch().toFixed(2),
             "Forward:", forward.map(n => n.toFixed(2)).join(', '));
         // console.log('right vector:', right);
         this.camera.moveBy(movementVec[0] * speed, movementVec[1] * speed, movementVec[2] * speed);
     }
 
+    enable() {
+        this._addEventListeners();
+
+        this.canvas.addEventListener('click', this._requestPointerLock);
+    }
+
+    disable() {
+        this._removeEventListeners();
+        document.exitPointerLock();
+        this.canvas.removeEventListener('click', this._requestPointerLock);
+    }
 }

@@ -1,3 +1,4 @@
+import { AppState, getCurrentState, switchState, onStateChange } from "./core/state-manager.js";
 import { MathUtils } from "./utils/math-utils.js";
 import { ViewportUtils } from "./utils/viewport-utils.js";
 import { Sphere } from "./scene-objects/sphere.js";
@@ -5,6 +6,50 @@ import { Plane } from "./scene-objects/plane.js";
 import { Camera } from "./camera/camera.js";
 import { CameraController } from "./camera/camera-controller.js";
 // Create a canvas element and add it to the document
+
+console.log('App starting in state:', getCurrentState());
+
+onStateChange((newState, oldState) => {
+    console.log(`State changed from ${oldState} to ${newState}`);
+
+    if (oldState === AppState.FIRST_PERSON) {
+        exitFirstPersonMode(); // Exit first-person mode if switching from it
+        canvas.style.display = 'none'; // Hide the canvas   
+    }
+
+    if (newState === AppState.FIRST_PERSON) {
+        canvas.style.display = 'block'; // Show the canvas
+        enterFirstPersonMode(); // Enter first-person mode
+    }
+
+    if (oldState === AppState.INTRO){
+        console.log('Exiting INTRO state');
+    }
+
+    if (newState === AppState.INTRO) {
+        console.log('Entering INTRO state');
+        // Here you can add logic to display the intro screen
+    }
+
+    if (oldState === AppState.TOP_DOWN) {
+        console.log('Exiting TOP_DOWN state');
+    }
+
+    if (newState === AppState.TOP_DOWN) {
+        console.log('Entering TOP_DOWN state');
+        // Here you can add logic to switch to top-down view
+    }
+
+});
+
+window.addEventListener('keydown', (e) => {
+    if (e.key === '1') switchState(AppState.INTRO);
+    if (e.key === '2') switchState(AppState.TOP_DOWN);
+    if (e.key === '3') switchState(AppState.FIRST_PERSON);
+});
+
+
+
 
 const canvas = document.createElement('canvas');
 canvas.width = 1080; // Set canvas width
@@ -25,18 +70,18 @@ canvas.style.imageRendering = 'pixelated';
 
 
 
+const recursion_depth = 3; // Set recursion depth for ray tracing
 
 document.addEventListener('pointerlockerror', () => {
     console.error('❌ Pointer lock failed.');
 });
 
-
-
-let running = true; // Flag to control the rendering loop
-const recursion_depth = 3; // Set recursion depth for ray tracing
-
 const camera = new Camera(); // Create a camera instance
+
 const cameraController = new CameraController(camera, canvas); // Create a camera controller instance
+
+let running = false; // Flag to control the rendering loop
+let loopId = null;
 
 
 // scene
@@ -45,7 +90,7 @@ const sceneObjects = [
     new Sphere([0, -1, 3], 1, [255, 0, 0], 500, 0.2), // Red sphere shiny
     new Sphere([-2, 0, 4], 1, [0, 0, 255], 500, 0.3), // Green sphere shiny
     new Sphere([2, 0, 4], 1, [0, 255, 0], 10, 0.4), // Blue sphere somewhat shiny
-    new Sphere([0, 0,-3 ], 1, [255, 0, 255], 10, 0.5), // Yellow sphere very shiny
+    new Sphere([0, 0, -3], 1, [255, 0, 255], 10, 0.5), // Yellow sphere very shiny
     // new Sphere([0, -5001, 0], 5000, [255, 255, 0], 1000, 0.5), // Yellow sphere very shiny
 
     new Plane([0, -1, 0], [0, 1, 0], [255, 255, 0], 1000, 0.5), // acts as floor just to test will remove later
@@ -70,7 +115,6 @@ const lights = [
 
 ]
 
-requestAnimationFrame(loop); // Start the rendering loop
 
 function loop() {
     if (!running) return;
@@ -200,4 +244,22 @@ function ComputeLighting(P, N, V, s) {
 
     }
     return i
+}
+
+
+function enterFirstPersonMode() {
+    // console.log('Entering First Person Mode');
+    cameraController.enable(); // Enable camera controller for first-person mode
+    running = true; // Start the rendering loop
+    loopId = requestAnimationFrame(loop); // Start the rendering loop
+}
+
+function exitFirstPersonMode() {
+    // console.log('Exiting First Person Mode');
+    cameraController.disable(); // Disable camera controller
+    running = false; // Stop the rendering loop
+    if (loopId) {
+        cancelAnimationFrame(loopId); // Cancel the rendering loop
+        loopId = null;
+    }
 }
