@@ -6,10 +6,10 @@ const RENDERERS = {
 
 export function getRenderer(name = "raytracer"){
     const renderer = RENDERERS[name];
-    if(!renderer) {
-        
+    if(!renderer){ 
+        throw new Error(`Renderer ${name} not found`);
     }
-    
-    
-    else throw("unsupported renderer");
+
+    return renderer;
+ 
 }

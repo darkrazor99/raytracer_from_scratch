@@ -1,8 +1,8 @@
 import { MathUtils } from "../utils/math-utils.js";
 import { ViewportUtils } from "../utils/viewport-utils.js";
 
-export function renderRaytracedScene(scene, camera, ctx, config) {
-    const { width, height, recursionDepth, lights } = config;
+export function renderRaytracedScene(camera, ctx, config) {
+    const { width, height, recursionDepth, lights, scene } = config;
 
     const R = camera.getRotationMatrix();
     const O = camera.getPosition();
