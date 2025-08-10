@@ -1,6 +1,4 @@
 import { AppState, getCurrentState, switchState, onStateChange } from "./core/state-manager.js";
-import { MathUtils } from "./utils/math-utils.js";
-import { ViewportUtils } from "./utils/viewport-utils.js";
 import { Sphere } from "./scene-objects/sphere.js";
 import { Plane } from "./scene-objects/plane.js";
 import { Camera } from "./camera/camera.js";
@@ -116,19 +114,7 @@ const config = {
 
 
 
-
-
-const recursion_depth = 3; // Set recursion depth for ray tracing
-
-
 const renderer = getRenderer("raytracer"); // Get the raytracer renderer
-
-
-
-
-document.addEventListener('pointerlockerror', () => {
-    console.error('❌ Pointer lock failed.');
-});
 
 const camera = new Camera(); // Create a camera instance
 
@@ -136,9 +122,6 @@ const cameraController = new CameraController(camera, canvas); // Create a camer
 
 let running = false; // Flag to control the rendering loop
 let loopId = null;
-
-console.log("renderer", renderer)
-
 
 function loop() {
     if (!running) return;
