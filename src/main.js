@@ -7,8 +7,7 @@ import { getRenderer } from "./renderer/index.js";
 
 
 
-// Create a canvas element and add it to the document
-
+// Initialize the app state
 console.log('App starting in state:', getCurrentState());
 
 onStateChange((newState, oldState) => {
@@ -44,6 +43,7 @@ onStateChange((newState, oldState) => {
 
 });
 
+// temp controlls to handle state changes
 window.addEventListener('keydown', (e) => {
     if (e.key === '1') switchState(AppState.INTRO);
     if (e.key === '2') switchState(AppState.TOP_DOWN);
@@ -51,13 +51,11 @@ window.addEventListener('keydown', (e) => {
 });
 
 
-
-
+// Create the main canvas, and camera and descripe the scene then call the renderer
 const canvas = document.createElement('canvas');
 canvas.width = 1080; // Set canvas width
 canvas.height = 720; // Set canvas height
 document.body.appendChild(canvas);
-// Get the 2D rendering context
 const ctx = canvas.getContext('2d');
 
 // lowResCanvas
@@ -70,10 +68,7 @@ ctx.imageSmoothingEnabled = false;
 lowResCtx.imageSmoothingEnabled = false;
 canvas.style.imageRendering = 'pixelated';
 
-
-
 // scene
-
 const sceneObjects = [
     new Sphere([0, -1, 3], 1, [255, 0, 0], 500, 0.2), // Red sphere shiny
     new Sphere([-2, 0, 4], 1, [0, 0, 255], 500, 0.3), // Green sphere shiny
@@ -112,14 +107,11 @@ const config = {
     scene: sceneObjects,
 };
 
+const renderer = getRenderer("raytracer"); 
 
+const camera = new Camera(); 
 
-const renderer = getRenderer("raytracer"); // Get the raytracer renderer
-
-const camera = new Camera(); // Create a camera instance
-
-const cameraController = new CameraController(camera, canvas); // Create a camera controller instance
-
+const cameraController = new CameraController(camera, canvas); 
 let running = false; // Flag to control the rendering loop
 let loopId = null;
 
@@ -138,7 +130,6 @@ function loop() {
 //   we draw on the action canvas what the lower canvas has cause i render on low res then shove to high res and make it pixelated 
 //  for now untill i figure out a better way of doing this i guess i can hand it to renderer and make it take two canvases lowres + highres. 
     ctx.drawImage(lowResCanvas, 0, 0, canvas.width, canvas.height);
-    // renderScene(R, position); // Render the scene with the updated rotation
     requestAnimationFrame(loop); // Request the next frame
 
 }
@@ -146,14 +137,12 @@ function loop() {
 
 
 function enterFirstPersonMode() {
-    // console.log('Entering First Person Mode');
     cameraController.enable(); // Enable camera controller for first-person mode
     running = true; // Start the rendering loop
     loopId = requestAnimationFrame(loop); // Start the rendering loop
 }
 
 function exitFirstPersonMode() {
-    // console.log('Exiting First Person Mode');
     cameraController.disable(); // Disable camera controller
     running = false; // Stop the rendering loop
     if (loopId) {
