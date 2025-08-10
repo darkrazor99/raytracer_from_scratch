@@ -22,7 +22,7 @@ onStateChange((newState, oldState) => {
         enterFirstPersonMode(); // Enter first-person mode
     }
 
-    if (oldState === AppState.INTRO){
+    if (oldState === AppState.INTRO) {
         console.log('Exiting INTRO state');
     }
 
@@ -134,9 +134,10 @@ function loop() {
 
 
 function renderScene(R, O) {
+
     for (let x = -(lowResCanvas.width / 2); x < (lowResCanvas.width / 2); x++) {
         for (let y = -(lowResCanvas.height / 2); y < (lowResCanvas.height / 2); y++) {
-            const D = ViewportUtils.canvasToViewPort(x, y, lowResCanvas, camera.getViewportHeight(), camera.getViewportWidth(), camera.getViewportDistance()); // Convert canvas coordinates to viewport coordinates
+            const D = ViewportUtils.canvasToViewPort(x, y, lowResCanvas.height, lowResCanvas.width, camera.getViewportHeight(), camera.getViewportWidth(), camera.getViewportDistance()); // Convert canvas coordinates to viewport coordinates
             const rotated_D = MathUtils.rotateVector(D, R); // Rotate the direction vector
             const color = TraceRay(O, rotated_D, 1, Infinity, recursion_depth);
             lowResCtx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
