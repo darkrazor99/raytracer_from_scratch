@@ -1,0 +1,25 @@
+{
+  "name": "thingapeeppoop",
+  "version": "1.0.0",
+  "description": "* **Basic Ray Tracing**",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "http-server . -p 5500 -a localhost --cors"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/darkrazor99/raytracer_from_scratch.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/darkrazor99/raytracer_from_scratch/issues"
+  },
+  "homepage": "https://github.com/darkrazor99/raytracer_from_scratch#readme",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
