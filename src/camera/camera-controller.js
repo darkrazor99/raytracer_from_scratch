@@ -48,7 +48,6 @@ export class CameraController { // first person
         // if (e.key === 'Escape') {
         //     this._removeEventListeners();
         //     return;
-        // }
         this.keysPressed.add(e.key.toLowerCase());
     }
 
@@ -67,7 +66,6 @@ export class CameraController { // first person
         const newPitchClamped = Math.max(-maxPitch, Math.min(maxPitch, newPitch));
         this.camera.setYaw(newYaw);
         this.camera.setPitch(newPitchClamped);
-        // console.log(`Mouse moved: Yaw=${this.camera.getYaw().toFixed(2)}, Pitch=${this.camera.getPitch().toFixed(2)}`);
     }
 
     update() {
@@ -89,11 +87,6 @@ export class CameraController { // first person
             dx += right[0]; dy += right[1]; dz += right[2];
         }
         const movementVec = MathUtils.normalize3([dx, dy, dz]);
-        // console.log(`Movement vector: ${movementVec}`);
-        console.log("Yaw:", this.camera.getYaw().toFixed(2),
-            "Pitch:", this.camera.getPitch().toFixed(2),
-            "Forward:", forward.map(n => n.toFixed(2)).join(', '));
-        // console.log('right vector:', right);
         this.camera.moveBy(movementVec[0] * speed, movementVec[1] * speed, movementVec[2] * speed);
     }
 
